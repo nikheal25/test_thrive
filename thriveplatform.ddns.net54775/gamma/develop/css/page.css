@@ -1,0 +1,27 @@
+
+td.subtable_control {
+    background: url('../images/details_open.png') no-repeat center center;
+    cursor: pointer;
+    }
+    tr.shown td.subtable_control {
+      background: url('../images/details_close.png') no-repeat center center;
+    }
+    
+    td.score_details_control {
+    background: url('../images/details_open.png') no-repeat center center;
+    cursor: pointer;
+    }
+    tr.shown td.score_details_control {
+      background: url('../images/details_close.png') no-repeat center center;
+    }
+    
+    tr, td, table {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    li.jstree-open > a .jstree-icon {background:url("../images/details_close.png") 0px 0px no-repeat !important;}
+    li.jstree-closed > a .jstree-icon {background:url("../images/details_open.png") 0px 0px no-repeat !important;}
+    .subtable-weight-input{
+      width: 50px;
+    }

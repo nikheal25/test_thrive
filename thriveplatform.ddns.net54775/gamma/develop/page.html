@@ -1,0 +1,426 @@
+<html>
+<head>
+    
+    <link rel="stylesheet" type="text/css" href="css/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jstree_style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/page.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vue-select.css"/>
+    <link rel="stylesheet" type="text/css" href="css/goldenlayout-dark-theme.css"/>
+    <link
+    rel="stylesheet"
+    href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <!-- <link rel='stylesheet' type='text/css' href='../bower_components/jQuery-contextMenu/src/jquery.contextMenu.css'/>
+    <link rel='stylesheet' type='text/css' href='../bower_components/font-awesome/css/font-awesome.css'/>
+    <link rel="stylesheet" type="text/css" href="../bower_components/wcDocker/Build/wcDocker.min.css"/> -->
+    <script src="script/jquery-3.4.1.min.js"></script>
+    <!-- <script src='../bower_components/jQuery-contextMenu/src/jquery.contextMenu.js'></script>
+    <script src='../bower_components/jQuery-contextMenu/src/jquery.ui.position.js'></script>
+    <script src="../bower_components/wcDocker/Build/wcDocker.js"></script> -->
+    <script src="script/datatables.min.js"></script>
+    <script src="script//jstree.js"></script>
+    <script src="script/vue-select.js"></script>
+    <script src="script/d3.v5.min.js"></script>
+    <script src="script/d3-legend.min.js"></script>
+    <script src="script/chart.js"></script>
+    <script type="text/javascript" src="script//vue.js"></script>
+    <script src="script/arcgis.js"></script>
+    <script src="script/require.js"></script>
+    <!-- <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script> -->
+    <script>
+       _updateUserPanel = () => {};
+    </script>
+  </head>
+<body>
+  <div id="page">
+    Thrive v1.4.5 <br>
+    <!-- HUD==============================================================================================    -->
+    <!-- <template id = "HUD" >
+      <table style = "width: 100%; ">
+        <tbody v-bind:style='{backgroundColor: userData.tableColor}'>
+          <tr >           
+            <td >
+              <b>User Id:</b> {{ userData.userSettings.hud.userId }}
+            </td>
+            <td >
+              <b>d3Path:</b> {{ userData.userSettings.hud.d3Path }}
+            </td> 
+            <td >
+              <b>activeTab:</b> {{ userData.userSettings.hud.activeTab }}
+            </td> 
+            
+          </tr>
+          <tr >
+            <td >
+              <b>Date Time Start:</b> {{ userData.userSettings.hud.dateTimeStartId }}
+            </td>
+            <td >
+              <b>Date Time End:</b> {{ userData.userSettings.hud.dateTimeEndId }}
+            </td>
+            <td >
+              <b>Level:</b> 
+              {{ userData.userSettings.hud.levelId 
+                + ", " + userData.levelName }}
+            </td>
+            <td >
+              <b>Score:</b> {{ userData.score }}
+            </td>
+          </tr>
+          <tr >
+            <td >
+              <b>Classification:</b> {{ userData.userSettings.hud.classSelected }}
+            </td>
+            <td >
+              <b>Formula Engine:</b> 
+              {{ userData.userSettings.hud.formulaEngineSelected
+                + ", " + userData.formulaEngineName }}
+            </td>
+            <td >
+              <b>Weight Engine:</b> 
+              {{ userData.userSettings.hud.weightEngineSelected 
+               + ", " + userData.formulaEngineName}}
+            </td>            
+            <td >
+              <b>Rank #:</b> {{ userData.rank }} / {{ userData.rankTotal }} 
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </template> -->
+    DASHBOARD==============================================================================================
+
+    <template id = "dashboard" :class="userData.userSettings.tab[userData.dashboardIndex].class" :data-active-tab="userData.userSettings.tab[userData.dashboardIndex].activeTab"
+      :data-frame-id="userData.userSettings.tab[userData.dashboardIndex].frameId" :data-tab-id="userData.userSettings.tab[userData.dashboardIndex].tabId">
+      <span v-bind:style='{backgroundColor: userData.levelColor}'>DASHBOARD_{{userData.dashboardIndex}}</span>==============================================================================================   
+    </template>
+    <div id="viewDiv"></div>
+    <div id="timeSlider"></div>
+    <div id="titleDiv" class="esri-widget"></div>
+    <template id = "dashboard" :class="userData.userSettings.tab[userData.dashboardIndex].class" :data-active-tab="userData.userSettings.tab[userData.dashboardIndex].activeTab"
+      :data-frame-id="userData.userSettings.tab[userData.dashboardIndex].frameId" :data-tab-id="userData.userSettings.tab[userData.dashboardIndex].tabId">
+      <div v-bind:style='{backgroundColor: userData.levelColor}'>
+        <table v-bind:style='{backgroundColor: userData.tableColor}'>
+          <tbody>
+            <tr >           
+              <td >
+                <b>User Id:</b> {{ userData.userSettings.tab[userData.dashboardIndex].userId }}
+              </td>
+              <td >
+                <b>d3Path:</b> {{ userData.userSettings.tab[userData.dashboardIndex].d3Path }}
+              </td>
+              <td > 
+                <b>activeTab: </b> {{ userData.userSettings.tab[userData.dashboardIndex].activeTab }}
+              </td>
+              <td>
+                <b>Pin: </b> {{ userData.userSettings.tab[userData.dashboardIndex].pin }}
+              </td>
+            </tr>
+            <tr >
+              <td >
+                <b>Date Time Start:</b> 
+                <v-select  v-model="userData.userSettings.hud.dateTimeStartId"
+                :options="userData.dateTimeStartList" :reduce="option => option.text" label="text"
+                @input="updateUserPanel();">
+      
+              </v-select>
+              </td>
+              <td >
+                <b>Date Time End:</b> 
+                <v-select  v-model="userData.userSettings.hud.dateTimeEndId"
+                :options="userData.dateTimeEndList" :reduce="option => option.text" label="text"
+                @input="updateUserPanel();">
+              
+              </v-select>
+              </td>
+              <td >
+                <b>Level:</b> 
+                <v-select  
+                :key="userData.userSettings.hud.levelId"
+                v-model="userData.userSettings.hud.levelId"
+                :options="userData.levelOptions" 
+                :reduce="op => op.text" 
+                label="value"
+                @input="updateUserPanel();">
+                <template #selected-option="{ text, value }">
+                  {{ text }} {{ value }}
+                </template>
+                </v-select>
+              </td>
+              <td >
+                <b>Score:</b> {{ userData.scoreList[userData.dashboardIndex] }}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Classification:</b>
+                <v-select  v-model="userData.userSettings.hud.classSelected"
+                :value='text' :options="userData.classOptions" :reduce="option => option.text" label="value"
+                @input="updateUserPanel();">
+                  <template #no-options="{ text, value }">
+                    <br>
+                  </template>
+                </v-select>
+              </td>
+              <td>
+                <b>Formula Engine:</b>
+                <v-select  v-model="userData.userSettings.hud.formulaEngineSelected"
+                :options="userData.formulaEngineOptions" :reduce="option => option.text" label="value"
+                @input="updateUserPanel();">
+                  <template #selected-option="{ text, value }">
+                    {{ text }} {{ value }}
+                  </template>
+                </v-select>
+              </td>
+              <td>
+                <b>Weight Engine:</b>
+                <v-select v-model="userData.userSettings.hud.weightEngineSelected"
+                :options="userData.weightEngineOptions" :reduce="option => option.text" label="value"
+                @input="updateUserPanel();">
+                  <template #selected-option="{ text, value }">
+                    {{ text }} {{ value }}
+                  </template>
+                </v-select>
+                <!-- , {{ weightEngineSelected }} -->
+              </td>            
+              <td>
+                <b>Rank #:</b> {{ userData.rankList[userData.dashboardIndex] }} / {{ userData.rankTotalList[userData.dashboardIndex] }} 
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id = 'dashboardTree'>
+        </div>
+      </div>
+      
+      <!-- <pre>
+        userSettings: {{ userSettings }}
+      </pre>   -->
+    </template>
+    ===================================================================================================
+
+    TABLE===================================================================================================
+    <template id = "table">
+            <!-- Use v-for to generate tables. -->
+      <!-- <v-for "dindex in tableIndices"/>-->
+      <div v-for= "index in userData.tableIndices">
+        <span v-bind:style='{backgroundColor: userData.__dashboardData[index].color}'>TABLE_{{index}}</span>===================================================================================================
+        <div :id = "'table_' + userData.userSettings.tab[index].frameId + '_' + userData.userSettings.tab[index].tabId"
+        :class="userData.userSettings.tab[index].class" :data-active-tab="userData.userSettings.tab[index].activeTab"
+        :data-frame-id="userData.userSettings.tab[index].frameId" 
+        :data-tab-id="userData.userSettings.tab[index].tabId"
+        v-bind:style='{backgroundColor: userData.__dashboardData[index].color}'
+        >
+        
+          <table style = "width: 100%; ">
+            <tbody>
+              <tr >           
+                <td>
+                  <!--  will be something like userData.userSettings.tab[index].userId -->
+                  <b>User Id:</b> {{ userData.userSettings.tab[index].userId }}
+                </td>
+                <td >
+                  <b>d3Path:</b> {{ userData.userSettings.tab[index].d3Path }}
+                </td>
+                <td >
+                  <b>activeTab:</b> {{ userData.userSettings.tab[index].activeTab }}
+                </td>
+                <td>
+                  <b>Pin: </b> <input type="checkbox" @change="updateUserPanel"
+                  :id="'checkbox_' + userData.userSettings.tab[index].frameId + '_' + userData.userSettings.tab[index].tabId" 
+                  v-model="userData.userSettings.tab[index].pin">
+                </td> 
+              </tr>
+              <tr >
+                <td >
+                  <b>Date Time Start:</b> {{ userData.userSettings.tab[index].dateTimeStartId }}
+                </td>
+                <td >
+                  <b>Date Time End:</b> {{ userData.userSettings.tab[index].dateTimeEndId }}
+                </td>
+                <td >
+                  <b>Level:</b> 
+                  <!-- {{levelId}}  -->
+                  {{ userData.userSettings.tab[index].levelId + ", " +
+                userData.__dashboardData[index].level_name }}
+                </td>
+                <td >
+                  <b>Score:</b> {{ userData.scoreList[index] }}
+                </td>
+              </tr>
+              <tr >
+                <td >
+                  <b>Classification:</b> {{ userData.userSettings.tab[index].classSelected }}
+                </td>
+                <td >
+                  <b>Formula Engine:</b> 
+                  <!-- {{ formulaEngineSelected }} -->
+                  {{ userData.userSettings.tab[index].formulaEngineSelected + ", "+
+                  userData.__dashboardData[index].fe_name }}
+                </td>
+                <td >
+                  <b>Weight Engine:</b> 
+                  <!-- {{ weightEngineSelected }} -->
+                  {{ userData.userSettings.tab[index].weightEngineSelected + ", " +
+                  userData.__dashboardData[index].wf_name }}
+                </td>            
+                <td >
+                  <b>Rank #:</b> {{ userData.rankList[index] }} / {{ userData.rankTotalList[index] }}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <b>showRecs:</b> {{ userData.userSettings.tab[index].showRecs }}
+                </td>
+                <td>
+                  <b>lastPage: </b>{{ userData.userSettings.tab[index].lastPage }}
+                </td>
+                <td>
+                  <b>displayColumns: </b>{{ userData.userSettings.tab[index].displayCols }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table :id="'tableDT_' + index" >
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      
+      
+    </template>
+    ===================================================================================================
+
+    CHART===================================================================================================
+    <template id = "chart" >
+      <!-- Use v-for to generate chartIndices. -->
+      <div v-for= "index in userData.chartIndices">
+        <span v-bind:style='{backgroundColor: userData.__dashboardData[index].color}'>CHART_{{index}}</span>===================================================================================================
+        <div :id = "'chart_' + userData.userSettings.tab[index].frameId + '_' + userData.userSettings.tab[index].tabId"
+        :class="userData.userSettings.tab[index].class" :data-active-tab="userData.userSettings.tab[index].activeTab"
+        :data-frame-id="userData.userSettings.tab[index].frameId" :data-tab-id="userData.userSettings.tab[index].tabId"
+        v-bind:style='{backgroundColor: userData.__dashboardData[index].color}'>
+          <table style = "width: 100%; ">
+            <tbody>
+              <tr >           
+                <td >
+                  <b>User Id:</b> {{ userData.userSettings.tab[index].userId }}
+                </td>
+                <td >
+                  <b>d3Path:</b> {{ userData.userSettings.tab[index].d3Path }}
+                </td>
+                <td >
+                  <b>activeTab:</b> {{ userData.userSettings.tab[index].activeTab }}
+                </td>
+                <td>
+                  <b>Pin: </b><input type="checkbox" @change="updateUserPanel"
+                  :id="'checkbox_' + userData.userSettings.tab[index].frameId + '_' + userData.userSettings.tab[index].tabId" 
+                  v-model="userData.userSettings.tab[index].pin">
+                </td> 
+              </tr>
+              <tr >
+                <td >
+                  <b>Date Time Start:</b> {{ userData.userSettings.tab[index].dateTimeStartId }}
+                </td>
+                <td >
+                  <b>Date Time End:</b> {{ userData.userSettings.tab[index].dateTimeEndId }}
+                </td>
+                <td >
+                  <b>Level:</b> 
+                  <!-- {{levelId}} -->
+                  {{ userData.userSettings.tab[index].levelId + ", " +
+                  userData.__dashboardData[index].level_name }}
+                </td>
+                <td >
+                  <b>Score:</b> {{ userData.scoreList[index] }}
+                </td>
+              </tr>
+              <tr >
+                <td >
+                  <b>Classification:</b> {{ userData.userSettings.tab[index].classSelected }}
+                </td>
+                <td >
+                  <b>Formula Engine:</b> 
+                  <!-- {{ formulaEngineSelected }} -->
+                  {{ userData.userSettings.tab[index].formulaEngineSelected + ", "+
+                  userData.__dashboardData[index].fe_name }}
+                </td>
+                <td >
+                  <b>Weight Engine:</b> 
+                  <!-- {{ weightEngineSelected }} -->
+                  {{ userData.userSettings.tab[index].weightEngineSelected + ", " +
+                  userData.__dashboardData[index].wf_name }}
+                </td>            
+                <td >
+                  <b>Rank #:</b> {{ userData.rankList[index] }} / {{ userData.rankTotalList[index] }} 
+                </td>
+              </tr>
+
+              <!-- Put selection menu -->
+              
+              <tr>
+                <td>
+                  <div v-if='userData.userSettings.tab[index].pin'>
+                    <select v-model=" userData.userSettings.tab[index].chartType" disabled>
+                      <option>Pie Chart</option>
+                      <option>Donut Chart</option>
+                    </select>
+                  </div>
+                  <div v-else>
+                    <select v-model=" userData.userSettings.tab[index].chartType" >
+                      <option>Pie Chart</option>
+                      <option>Donut Chart</option>
+                    </select>
+                  </div>
+                  <br>
+                  <b>chartType:</b> {{ userData.userSettings.tab[index].chartType }}
+                </td>
+                <td>
+                  <div v-if='userData.userSettings.tab[index].pin'>
+                    <select v-model=" userData.userSettings.tab[index].labelType " disabled>
+                      <option>on</option>
+                      <option>off</option>
+                    </select>
+                  </div>
+                  <div v-else>
+                    <select v-model=" userData.userSettings.tab[index].labelType " >
+                      <option>on</option>
+                      <option>off</option>
+                    </select>
+                  </div>
+                  <br>
+                  <b>labelType: </b>{{ userData.userSettings.tab[index].labelType }}
+                </td>
+                <td>
+                  <div v-if='userData.userSettings.tab[index].pin'>
+                    <select v-model=" userData.userSettings.tab[index].legendType " disabled>
+                      <option>on</option>
+                      <option>off</option>
+                    </select>
+                  </div>
+                  <div v-else>
+                    <select v-model=" userData.userSettings.tab[index].legendType " >
+                      <option>on</option>
+                      <option>off</option>
+                    </select>
+                  </div>
+                  <br>
+                  <b>legendType: </b>{{ userData.userSettings.tab[index].legendType }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      <div :id = '"d3ImageLoc_" + index'>
+      
+      </div>
+    </div>
+    </template>
+    ===================================================================================================
+  </div>
+
+  <script src="script/page.js"></script>
+</body>
+</html>
+
